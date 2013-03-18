@@ -1,0 +1,77 @@
+## This file is part of the coreboot project.
+##
+## Copyright (C) 2011 The ChromiumOS Authors.  All rights reserved.
+##
+## This program is free software; you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation; version 2 of the License.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program; if not, write to the Free Software
+## Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+##
+
+config CHROMEOS
+	bool
+	default n
+	select TPM
+	select CACHE_ROM
+	help
+	  Enable ChromeOS specific features like the GPIO sub table in
+	  the coreboot table. NOTE: Enabling this option on an unsupported
+	  board will most likely break your build.
+
+menu "ChromeOS"
+	depends on CHROMEOS
+
+config VBNV_OFFSET
+	hex
+	default 0x26
+	help
+	  CMOS offset for VbNv data. This value must match cmos.layout
+	  in the mainboard directory, minus 14 bytes for the RTC.
+
+config VBNV_SIZE
+	hex
+	default 0x10
+	help
+	  CMOS storage size for VbNv data. This value must match cmos.layout
+	  in the mainboard directory.
+
+config CHROMEOS_RAMOOPS
+	bool "Reserve space for Chrome OS ramoops"
+	default y
+
+config CHROMEOS_RAMOOPS_RAM_START
+	hex "Physical address of preserved RAM"
+	default 0x00f00000
+	depends on CHROMEOS_RAMOOPS
+
+config CHROMEOS_RAMOOPS_RAM_SIZE
+	hex "Size of preserved RAM"
+	default 0x00100000
+	depends on CHROMEOS_RAMOOPS
+
+config FLASHMAP_OFFSET
+	hex "Flash Map Offset"
+	default 0x00670000 if NORTHBRIDGE_INTEL_SANDYBRIDGE
+	default 0x00610000 if NORTHBRIDGE_INTEL_IVYBRIDGE
+	default 0
+	help
+	  Offset of flash map in firmware image
+
+endmenu
+
+config NO_TPM_RESUME
+	bool
+	default n
+	depends on CHROMEOS
+	help
+	  On some boards the TPM stays powered up in S3. On those
+	  boards, booting Windows will break if the TPM resume command
+	  is sent during an S3 resume.
